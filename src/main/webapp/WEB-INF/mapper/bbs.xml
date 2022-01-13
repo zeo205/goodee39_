@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="bbs">
+	<select id="selectBBSCount" parameterType="bbsVO" resultType="int">
+		select count(*)
+		from bbs
+		where isdelete = 'N'
+		<choose>
+			<when test="title != null and content != null">
+				and (title like #{title} or content like #{content})
+			</when>
+			<when test="title == null and content != null">
+				and content like #{content}
+			</when>
+			<when test="title != null and content == null">
+				and content like #{title}
+			</when>
+		</choose>
+		<if test="title!=null">or title like #{title}</if>
+		<if test="content!=null">or content like #{content}</if>
+	</select>
+	
+	<select id="selectBBSList" parameterType="bbsVO" resultType="bbsVO">
+		select num, title, ownerid, ownername, createdate, isdelete
+		from bbs
+		where isdelete = 'N'
+		<choose>
+			<when test="title != null and content != null">
+				and (title like #{title} or content like #{content})
+			</when>
+			<when test="title == null and content != null">
+				and content like #{content}
+			</when>
+			<when test="title != null and content == null">
+				and content like #{title}
+			</when>
+		</choose>
+		order by num desc
+		limit #{start}, #{count}
+	</select>
+	
+	<select id="selectBBS" parameterType="bbsVO" resultType="bbsVO">
+		select num, title, content, ownerid, ownername, createdate, isdelete
+		from bbs
+		where isdelete = 'N'
+		and num=#{num}
+	</select>
+	
+	<insert id="insertBBS" parameterType="bbsVO"
+	useGeneratedKeys="true" keyProperty="num">
+		insert into bbs(title, content, ownerid, ownername, createdate)
+		values(#{title},#{content},#{ownerid},#{ownername},#{createdate})
+	</insert>
+	
+	<update id="updateBBS" parameterType="bbsVO">
+		update bbs
+		<set>
+			<if test="title!=null">, title = #{title}</if>
+			<if test="content!=null">, content = #{content}</if>
+		</set>
+		where num=#{num}
+	</update>
+	
+	<delete id="deleteBBS" parameterType="bbsVO">
+		update bbs set isdelete='Y' where num=#{num}
+	</delete>
+</mapper>
